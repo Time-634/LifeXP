@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,373 +10,208 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<title>Life XP</title>
+<title>LifeXP — Real Life RPG</title>
 <style>
-* { box-sizing: border-box; }
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #09090f, #17172b);
-    color: white;
-    min-height: 100vh;
-}
-.container { width: 90%; max-width: 650px; margin: auto; padding: 30px 0; }
-h1 { text-align: center; font-size: 42px; margin-bottom: 5px; }
-h2 { margin-top: 0; }
-.subtitle { text-align: center; color: #9ca3af; }
-.card {
-    background: #1f1f35;
-    border-radius: 20px;
-    padding: 25px;
-    margin-top: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,.3);
-}
-.level { text-align: center; font-size: 35px; font-weight: bold; color: #a78bfa; }
-.xp-text { text-align: center; color: #cbd5e1; }
-.progress {
-    width: 100%; height: 20px; background: #111827;
-    border-radius: 20px; overflow: hidden; margin-top: 15px;
-}
-.progress-bar {
-    height: 100%; width: 0%;
-    background: linear-gradient(90deg, #7c3aed, #22d3ee);
-    transition: width .4s;
-}
-.task {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 12px; background: #292945; padding: 15px;
-    margin-top: 12px; border-radius: 14px;
-}
-.task-info { font-size: 17px; }
-.task-xp { color: #22d3ee; font-weight: bold; margin-right: 8px; }
-button {
-    border: none; background: #7c3aed; color: white;
-    padding: 10px 15px; border-radius: 10px; cursor: pointer;
-    font-weight: bold;
-}
-button:hover { background: #8b5cf6; }
-button:disabled { background: #4b5563; cursor: not-allowed; }
-.reset { width: 100%; margin-top: 20px; background: #dc2626; }
-.secondary { background: #374151; }
-.form-row { display: flex; gap: 8px; margin-top: 12px; }
-input {
-    flex: 1; min-width: 0; padding: 12px;
-    border: 1px solid #4b5563; border-radius: 10px;
-    background: #111827; color: white; outline: none;
-}
-input:focus { border-color: #8b5cf6; }
-.form-row input[type="number"] { max-width: 110px; }
-.achievement {
-    background: #292945; padding: 12px; border-radius: 12px;
-    margin-top: 10px; opacity: .45;
-}
-.achievement.unlocked { opacity: 1; border: 1px solid #22d3ee; }
-.small { color: #9ca3af; font-size: 13px; }
-.streak {
-    text-align: center; font-size: 24px; margin-top: 10px;
-    color: #fb923c;
-}
-.empty { color: #9ca3af; text-align: center; padding: 15px 0; }
-.toast {
-    position: fixed; left: 50%; bottom: 25px;
-    transform: translateX(-50%) translateY(100px);
-    background: #111827; border: 1px solid #7c3aed;
-    padding: 14px 20px; border-radius: 14px;
-    transition: transform .3s; z-index: 10;
-    box-shadow: 0 10px 30px rgba(0,0,0,.4);
-}
-.toast.show { transform: translateX(-50%) translateY(0); }
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#24213f 0,#10101b 38%,#09090f 100%);color:#fff;min-height:100vh}
+.container{width:92%;max-width:760px;margin:auto;padding:22px 0 50px}
+header{text-align:center;padding:10px 0 8px}
+h1{font-size:44px;margin:0 0 4px;letter-spacing:1px}
+.subtitle{color:#a7adbd}
+.card{background:rgba(31,31,53,.9);border:1px solid #30304b;border-radius:20px;padding:20px;margin-top:16px;box-shadow:0 12px 35px rgba(0,0,0,.25)}
+.hero{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}
+.level{font-size:34px;font-weight:800;color:#c4b5fd}
+.xp-text{color:#cbd5e1;margin:6px 0}
+.progress{height:18px;background:#111827;border-radius:20px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,#7c3aed,#22d3ee);transition:width .4s}
+.streak{text-align:right;font-size:24px;color:#fb923c}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px}
+.stat{background:#17172a;border-radius:14px;padding:12px;text-align:center}
+.stat b{display:block;font-size:22px}.small{font-size:12px;color:#9ca3af}
+h2{margin:0 0 12px}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.tab,button{border:0;background:#7c3aed;color:#fff;padding:10px 13px;border-radius:10px;cursor:pointer;font-weight:700}
+.tab{background:#30304b}.tab.active{background:#7c3aed}
+button:disabled{background:#4b5563;cursor:not-allowed}
+.task{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#292945;padding:13px;margin-top:10px;border-radius:14px}
+.task-info{font-size:16px}.task-xp{color:#22d3ee;font-weight:bold;margin-right:7px}
+.badge{display:inline-block;font-size:11px;padding:4px 7px;border-radius:8px;background:#3b3b59;color:#cbd5e1;margin-left:6px}
+.form-row{display:flex;gap:8px;margin-top:10px}.form-row input:first-child{flex:1}.form-row input[type=number]{width:100px}
+input,select{padding:11px;border:1px solid #4b5563;border-radius:10px;background:#111827;color:#fff;outline:none}
+input:focus,select:focus{border-color:#8b5cf6}
+.achievement{background:#292945;padding:13px;border-radius:12px;margin-top:9px;opacity:.42}
+.achievement.unlocked{opacity:1;border:1px solid #22d3ee}
+.achievement.locked-premium{opacity:.75;border:1px dashed #8b5cf6}
+.profile-row{display:flex;align-items:center;gap:15px}
+.avatar{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;background:#2d2554;font-size:32px}
+.profile-name{font-size:25px;font-weight:800}
+.title{color:#a78bfa;margin-top:3px}
+.premium{background:linear-gradient(135deg,#2a1d4d,#182d42);border:1px solid #8b5cf6}
+.premium h2{color:#f5d76e}.premium ul{padding-left:20px;color:#d7d8e5}.premium li{margin:7px 0}
+.lock{float:right;background:#f5d76e;color:#17120a;padding:5px 8px;border-radius:8px;font-size:11px}
+.challenge{display:flex;justify-content:space-between;gap:12px;align-items:center;background:#292945;padding:13px;border-radius:13px;margin-top:9px}
+.reset{width:100%;margin-top:14px;background:#dc2626}.secondary{background:#374151}
+.empty{text-align:center;color:#9ca3af;padding:12px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(100px);background:#111827;border:1px solid #7c3aed;padding:13px 18px;border-radius:14px;transition:.3s;z-index:10;box-shadow:0 10px 30px #0008}.toast.show{transform:translateX(-50%) translateY(0)}
+@media(max-width:600px){.hero{grid-template-columns:1fr}.streak{text-align:left}.stats{grid-template-columns:repeat(2,1fr)}.form-row{flex-wrap:wrap}.form-row input:first-child{min-width:100%}.task{align-items:flex-start;flex-direction:column}.task button{margin-top:4px}}
 </style>
 </head>
-
 <body>
 <div class="container">
-    <h1>⚡ LIFE XP</h1>
-    <div class="subtitle">Turn your real life into a game.</div>
+<header><h1>⚡ LIFE XP</h1><div class="subtitle">Turn your real life into a game.</div></header>
 
-    <div class="card">
-        <div class="level">LEVEL <span id="level">1</span></div>
-        <p class="xp-text">
-            <span id="xp">0</span> / <span id="nextXP">500</span> XP
-        </p>
-        <div class="progress">
-            <div class="progress-bar" id="progress"></div>
-        </div>
-        <div class="streak">🔥 <span id="streak">0</span> day streak</div>
-    </div>
-
-    <div class="card">
-        <h2>🎯 Daily Quests</h2>
-        <div id="taskList"></div>
-    </div>
-
-    <div class="card">
-        <h2>➕ Add a Quest</h2>
-        <div class="form-row">
-            <input id="taskName" type="text" placeholder="Example: Read 20 minutes">
-            <input id="taskXP" type="number" min="1" max="1000" value="50">
-            <button onclick="addTask()">Add</button>
-        </div>
-        <p class="small">Choose how much XP the quest is worth.</p>
-    </div>
-
-    <div class="card">
-        <h2>🏆 Achievements</h2>
-        <div id="achievementList"></div>
-    </div>
-
-    <div class="card">
-        <h2>📊 Stats</h2>
-        <p>Quests completed: <b id="quests">0</b></p>
-        <p>Total XP earned: <b id="totalXP">0</b></p>
-        <button class="reset" onclick="resetGame()">Reset Progress</button>
-    </div>
+<div class="card hero">
+  <div>
+    <div class="level">LEVEL <span id="level">1</span></div>
+    <p class="xp-text"><span id="xp">0</span> / <span id="nextXP">500</span> XP</p>
+    <div class="progress"><div class="progress-bar" id="progress"></div></div>
+  </div>
+  <div class="streak">🔥 <span id="streak">0</span><div class="small">day streak</div></div>
 </div>
 
+<div class="stats">
+  <div class="stat"><b id="quests">0</b><span class="small">Quests Done</span></div>
+  <div class="stat"><b id="totalXP">0</b><span class="small">Total XP</span></div>
+  <div class="stat"><b id="achCount">0</b><span class="small">Achievements</span></div>
+</div>
+
+<div class="card">
+  <div class="profile-row">
+    <div class="avatar">🧑‍🚀</div>
+    <div><div class="profile-name" id="profileName">Player</div><div class="title" id="profileTitle">Rookie</div></div>
+  </div>
+  <div class="form-row"><input id="nameInput" placeholder="Your player name"><button onclick="saveProfile()">Save Profile</button></div>
+  <p class="small">Your profile is stored on this device.</p>
+</div>
+
+<div class="card">
+  <div class="section-head"><h2>🎯 Daily Quests</h2><span class="badge" id="questCount">0 today</span></div>
+  <div class="tabs" id="categoryTabs"></div>
+  <div id="taskList"></div>
+</div>
+
+<div class="card">
+  <h2>➕ Create a Quest</h2>
+  <div class="form-row">
+    <input id="taskName" type="text" placeholder="Example: Read 20 minutes">
+    <input id="taskXP" type="number" min="1" max="1000" value="50">
+    <select id="taskCategory">
+      <option>Mind</option><option>Body</option><option>Life</option><option>School</option><option>Hobbies</option>
+    </select>
+    <button onclick="addTask()">Add</button>
+  </div>
+  <p class="small">Premium will eventually unlock unlimited custom quests. This version includes the starter quest system.</p>
+</div>
+
+<div class="card">
+  <h2>🏆 Achievements</h2>
+  <div id="achievementList"></div>
+</div>
+
+<div class="card">
+  <h2>⚔️ Challenges</h2>
+  <div class="challenge"><div><b>7-Day Starter</b><div class="small">Complete at least one quest for 7 days.</div></div><span class="badge">+250 XP</span></div>
+  <div class="challenge"><div><b>XP Hunter</b><div class="small">Earn 1,000 total XP.</div></div><span class="badge">+100 XP</span></div>
+  <p class="small">More challenge types are planned for Premium.</p>
+</div>
+
+<div class="card premium">
+  <span class="lock">COMING SOON</span>
+  <h2>⭐ LifeXP Premium</h2>
+  <p><b>$9.99 / year</b></p>
+  <ul>
+    <li>♾️ Unlimited custom quests</li>
+    <li>📊 Advanced statistics</li>
+    <li>🏆 Premium achievements</li>
+    <li>🔥 Streak rewards</li>
+    <li>🗂️ Quest categories</li>
+    <li>⚔️ More challenges</li>
+    <li>🎨 Premium themes</li>
+    <li>🧑‍🎤 Player profiles and titles</li>
+    <li>🚫 No ads</li>
+    <li>🌳 Future LifeXP Skill Tree</li>
+  </ul>
+  <button onclick="showToast('⭐ Premium is coming soon!')">Learn About Premium</button>
+</div>
+
+<div class="card">
+  <h2>🌳 LifeXP Skill Tree</h2>
+  <div class="stats">
+    <div class="stat">🧠<b>Mind</b><span class="small">Level 1</span></div>
+    <div class="stat">💪<b>Body</b><span class="small">Level 1</span></div>
+    <div class="stat">🏠<b>Life</b><span class="small">Level 1</span></div>
+    <div class="stat">🔥<b>Discipline</b><span class="small">Level 1</span></div>
+  </div>
+  <p class="small">Your real-life RPG skill tree is coming in a future update.</p>
+</div>
+
+<div class="card">
+  <h2>📊 Player Stats</h2>
+  <p>Quests completed: <b id="quests2">0</b></p>
+  <p>Total XP earned: <b id="totalXP2">0</b></p>
+  <p>Longest streak: <b id="longestStreak">0</b> days</p>
+  <button class="reset" onclick="resetGame()">Reset Progress</button>
+</div>
+</div>
 <div id="toast" class="toast"></div>
 
 <script>
-const DEFAULT_TASKS = [
-    { id: "study", name: "📚 Study", xp: 50 },
-    { id: "exercise", name: "🏃 Exercise", xp: 100 },
-    { id: "clean", name: "🧹 Clean Room", xp: 40 },
-    { id: "water", name: "💧 Drink Water", xp: 20 },
-    { id: "sleep", name: "😴 Sleep 8 Hours", xp: 100 }
+const DEFAULT_TASKS=[
+{id:"study",name:"📚 Study",xp:50,category:"School"},
+{id:"exercise",name:"🏃 Exercise",xp:100,category:"Body"},
+{id:"clean",name:"🧹 Clean Room",xp:40,category:"Life"},
+{id:"water",name:"💧 Drink Water",xp:20,category:"Body"},
+{id:"sleep",name:"😴 Sleep 8 Hours",xp:100,category:"Body"}
 ];
-
-const ACHIEVEMENTS = [
-    { id: "first", icon: "⭐", name: "First Quest", description: "Complete your first quest", check: s => s.quests >= 1 },
-    { id: "streak3", icon: "🔥", name: "On Fire", description: "Reach a 3 day streak", check: s => s.streak >= 3 },
-    { id: "level5", icon: "⚔️", name: "Level 5", description: "Reach level 5", check: s => s.xp >= 2000 },
-    { id: "xp5000", icon: "💎", name: "XP Collector", description: "Earn 5,000 total XP", check: s => s.xp >= 5000 },
-    { id: "level10", icon: "👑", name: "Level 10", description: "Reach level 10", check: s => s.xp >= 4500 }
+const ACHIEVEMENTS=[
+{id:"first",icon:"⭐",name:"First Quest",description:"Complete your first quest",check:s=>s.quests>=1},
+{id:"streak3",icon:"🔥",name:"On Fire",description:"Reach a 3 day streak",check:s=>s.streak>=3},
+{id:"streak7",icon:"🔥",name:"Unstoppable",description:"Reach a 7 day streak",check:s=>s.streak>=7},
+{id:"level5",icon:"⚔️",name:"Level 5",description:"Reach level 5",check:s=>s.level>=5},
+{id:"xp5000",icon:"💎",name:"XP Collector",description:"Earn 5,000 total XP",check:s=>s.xp>=5000},
+{id:"level10",icon:"👑",name:"Legend",description:"Reach level 10",check:s=>s.level>=10},
+{id:"quests100",icon:"🏅",name:"Hard Worker",description:"Complete 100 quests",check:s=>s.quests>=100},
+{id:"premium1",icon:"⭐",name:"Premium Explorer",description:"Premium achievement — coming soon",premium:true,check:()=>false}
 ];
+let xp=Number(localStorage.getItem("lifeXP"))||0;
+let quests=Number(localStorage.getItem("quests"))||0;
+let streak=Number(localStorage.getItem("lifeXPStreak"))||0;
+let longestStreak=Number(localStorage.getItem("lifeXPLongestStreak"))||0;
+let lastCompletedDate=localStorage.getItem("lifeXPLastDate")||"";
+let tasks=JSON.parse(localStorage.getItem("lifeXPTasks")||"null")||DEFAULT_TASKS.map(t=>({...t}));
+tasks=tasks.map(t=>({...t,category:t.category||"Life"}));
+let completedToday=JSON.parse(localStorage.getItem("lifeXPCompletedToday")||"[]");
+let profileName=localStorage.getItem("lifeXPProfileName")||"Player";
+let selectedCategory="All";
 
-let xp = Number(localStorage.getItem("lifeXP")) || 0;
-let quests = Number(localStorage.getItem("quests")) || 0;
-let streak = Number(localStorage.getItem("lifeXPStreak")) || 0;
-let lastCompletedDate = localStorage.getItem("lifeXPLastDate") || "";
-let tasks = JSON.parse(localStorage.getItem("lifeXPTasks") || "null") || DEFAULT_TASKS.map(t => ({...t}));
-let completedToday = JSON.parse(localStorage.getItem("lifeXPCompletedToday") || "[]");
-
-function todayKey() {
-    const d = new Date();
-    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+function todayKey(){let d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function yesterdayKey(){let d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function xpNeededForLevel(l){return l<=1?0:Math.round(500*Math.pow(l-1,1.25))}
+function getLevelInfo(){let level=1;while(xp>=xpNeededForLevel(level+1))level++;let base=xpNeededForLevel(level),next=xpNeededForLevel(level+1);return{level,current:xp-base,needed:next-base}}
+function save(){
+localStorage.setItem("lifeXP",xp);localStorage.setItem("quests",quests);localStorage.setItem("lifeXPStreak",streak);
+localStorage.setItem("lifeXPLongestStreak",longestStreak);localStorage.setItem("lifeXPLastDate",lastCompletedDate);
+localStorage.setItem("lifeXPTasks",JSON.stringify(tasks));localStorage.setItem("lifeXPCompletedToday",JSON.stringify(completedToday));
+localStorage.setItem("lifeXPProfileName",profileName)
 }
-
-function yesterdayKey() {
-    const d = new Date();
-    d.setDate(d.getDate() - 1);
-    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
-}
-
-function checkNewDay() {
-    const today = todayKey();
-    if (localStorage.getItem("lifeXPLastOpened") !== today) {
-        completedToday = [];
-        localStorage.setItem("lifeXPLastOpened", today);
-        save();
-    }
-}
-
-function xpNeededForLevel(level) {
-    if (level <= 1) return 0;
-    return Math.round(500 * Math.pow(level - 1, 1.25));
-}
-
-function getLevelInfo() {
-    let level = 1;
-    while (xp >= xpNeededForLevel(level + 1)) level++;
-    const current = xp - xpNeededForLevel(level);
-    const needed = xpNeededForLevel(level + 1) - xpNeededForLevel(level);
-    return { level, current, needed };
-}
-
-function save() {
-    localStorage.setItem("lifeXP", xp);
-    localStorage.setItem("quests", quests);
-    localStorage.setItem("lifeXPStreak", streak);
-    localStorage.setItem("lifeXPLastDate", lastCompletedDate);
-    localStorage.setItem("lifeXPTasks", JSON.stringify(tasks));
-    localStorage.setItem("lifeXPCompletedToday", JSON.stringify(completedToday));
-}
-
-function updateGame() {
-    checkNewDay();
-
-    const info = getLevelInfo();
-    document.getElementById("level").textContent = info.level;
-    document.getElementById("xp").textContent = info.current;
-    document.getElementById("nextXP").textContent = info.needed;
-    document.getElementById("progress").style.width =
-        Math.min(100, info.current / info.needed * 100) + "%";
-
-    document.getElementById("quests").textContent = quests;
-    document.getElementById("totalXP").textContent = xp;
-    document.getElementById("streak").textContent = streak;
-
-    renderTasks();
-    renderAchievements();
-    save();
-}
-
-function renderTasks() {
-    const list = document.getElementById("taskList");
-
-    if (!tasks.length) {
-        list.innerHTML = '<div class="empty">No quests yet. Add one below!</div>';
-        return;
-    }
-
-    list.innerHTML = tasks.map(task => {
-        const done = completedToday.includes(task.id);
-        return `
-            <div class="task">
-                <div class="task-info">
-                    ${escapeHtml(task.name)}
-                </div>
-                <div>
-                    <span class="task-xp">+${task.xp} XP</span>
-                    <button ${done ? "disabled" : ""}
-                        onclick="completeTask('${task.id}')">
-                        ${done ? "✓ Done" : "Complete"}
-                    </button>
-                </div>
-            </div>
-        `;
-    }).join("");
-}
-
-function completeTask(id) {
-    if (completedToday.includes(id)) return;
-
-    const task = tasks.find(t => t.id === id);
-    if (!task) return;
-
-    const oldLevel = getLevelInfo().level;
-    const today = todayKey();
-
-    if (lastCompletedDate !== today) {
-        if (lastCompletedDate === yesterdayKey()) {
-            streak++;
-        } else {
-            streak = 1;
-        }
-        lastCompletedDate = today;
-    }
-
-    xp += task.xp;
-    quests++;
-    completedToday.push(id);
-    save();
-    updateGame();
-
-    const newLevel = getLevelInfo().level;
-
-    if (newLevel > oldLevel) {
-        showToast("🎉 LEVEL UP! You reached Level " + newLevel + "!");
-    } else {
-        showToast("+" + task.xp + " XP earned! ⚡");
-    }
-}
-
-function addTask() {
-    const nameInput = document.getElementById("taskName");
-    const xpInput = document.getElementById("taskXP");
-
-    const name = nameInput.value.trim();
-    const amount = Number(xpInput.value);
-
-    if (!name) {
-        showToast("Enter a quest name first.");
-        return;
-    }
-
-    if (!amount || amount < 1 || amount > 1000) {
-        showToast("XP must be between 1 and 1000.");
-        return;
-    }
-
-    tasks.push({
-        id: "custom-" + Date.now(),
-        name: "🎯 " + name,
-        xp: amount
-    });
-
-    nameInput.value = "";
-    xpInput.value = 50;
-    save();
-    updateGame();
-    showToast("Quest added! 🎯");
-}
-
-function renderAchievements() {
-    const info = {
-        xp,
-        quests,
-        streak,
-        level: getLevelInfo().level
-    };
-
-    const unlocked = JSON.parse(localStorage.getItem("lifeXPAchievements") || "[]");
-
-    document.getElementById("achievementList").innerHTML = ACHIEVEMENTS.map(a => {
-        const earned = unlocked.includes(a.id) || a.check(info);
-        if (earned && !unlocked.includes(a.id)) unlocked.push(a.id);
-
-        return `
-            <div class="achievement ${earned ? "unlocked" : ""}">
-                ${a.icon} <b>${a.name}</b> — ${a.description}
-                ${earned ? " ✓" : ""}
-            </div>
-        `;
-    }).join("");
-
-    localStorage.setItem("lifeXPAchievements", JSON.stringify(unlocked));
-}
-
-function resetGame() {
-    if (!confirm("Reset all Life XP progress, quests, streak, and custom quests?")) return;
-
-    xp = 0;
-    quests = 0;
-    streak = 0;
-    lastCompletedDate = "";
-    tasks = DEFAULT_TASKS.map(t => ({...t}));
-    completedToday = [];
-
-    localStorage.removeItem("lifeXPAchievements");
-    localStorage.removeItem("lifeXPLastOpened");
-    save();
-    updateGame();
-    showToast("Progress reset.");
-}
-
-function showToast(message) {
-    const toast = document.getElementById("toast");
-    toast.textContent = message;
-    toast.classList.add("show");
-    clearTimeout(window.toastTimer);
-    window.toastTimer = setTimeout(() => toast.classList.remove("show"), 2500);
-}
-
-function escapeHtml(text) {
-    return text.replace(/[&<>"']/g, char => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;",
-        '"': "&quot;", "'": "&#039;"
-    }[char]));
-}
-
-checkNewDay();
-updateGame();
+function checkNewDay(){let t=todayKey();if(localStorage.getItem("lifeXPLastOpened")!==t){completedToday=[];localStorage.setItem("lifeXPLastOpened",t);save()}}
+function updateGame(){checkNewDay();let i=getLevelInfo();document.getElementById("level").textContent=i.level;document.getElementById("xp").textContent=i.current;document.getElementById("nextXP").textContent=i.needed;document.getElementById("progress").style.width=Math.min(100,i.current/i.needed*100)+"%";document.getElementById("streak").textContent=streak;document.getElementById("quests").textContent=quests;document.getElementById("quests2").textContent=quests;document.getElementById("totalXP").textContent=xp;document.getElementById("totalXP2").textContent=xp;document.getElementById("longestStreak").textContent=longestStreak;document.getElementById("profileName").textContent=profileName;document.getElementById("nameInput").value=profileName;document.getElementById("profileTitle").textContent=getTitle(i.level,quests,streak);renderCategories();renderTasks();renderAchievements();save()}
+function getTitle(level,q,s){if(level>=10)return"👑 Legend";if(s>=7)return"🔥 Unstoppable";if(q>=100)return"🏅 Hard Worker";if(level>=5)return"⚔️ Adventurer";return"⭐ Rookie"}
+function renderCategories(){let cats=["All",...new Set(tasks.map(t=>t.category))];document.getElementById("categoryTabs").innerHTML=cats.map(c=>`<button class="tab ${selectedCategory===c?"active":""}" onclick="selectCategory('${escapeHtml(c)}')">${escapeHtml(c)}</button>`).join("")}
+function selectCategory(c){selectedCategory=c;renderCategories();renderTasks()}
+function renderTasks(){let visible=tasks.filter(t=>selectedCategory==="All"||t.category===selectedCategory);document.getElementById("questCount").textContent=completedToday.length+" today";document.getElementById("taskList").innerHTML=visible.length?visible.map(t=>{let done=completedToday.includes(t.id);return`<div class="task"><div class="task-info">${escapeHtml(t.name)} <span class="badge">${escapeHtml(t.category)}</span></div><div><span class="task-xp">+${t.xp} XP</span><button ${done?"disabled":""} onclick="completeTask('${t.id}')">${done?"✓ Done":"Complete"}</button></div></div>`}).join(""):'<div class="empty">No quests in this category yet.</div>'}
+function completeTask(id){if(completedToday.includes(id))return;let t=tasks.find(x=>x.id===id);if(!t)return;let old=getLevelInfo().level,today=todayKey();if(lastCompletedDate!==today){streak=lastCompletedDate===yesterdayKey()?streak+1:1;longestStreak=Math.max(longestStreak,streak);lastCompletedDate=today}xp+=t.xp;quests++;completedToday.push(id);save();updateGame();let nl=getLevelInfo().level;showToast(nl>old?"🎉 LEVEL UP! Level "+nl+"!":"+"+t.xp+" XP earned! ⚡")}
+function addTask(){let n=document.getElementById("taskName").value.trim(),a=Number(document.getElementById("taskXP").value),c=document.getElementById("taskCategory").value;if(!n){showToast("Enter a quest name first.");return}if(!a||a<1||a>1000){showToast("XP must be between 1 and 1000.");return}tasks.push({id:"custom-"+Date.now(),name:"🎯 "+n,xp:a,category:c});document.getElementById("taskName").value="";document.getElementById("taskXP").value=50;save();updateGame();showToast("Quest added! 🎯")}
+function saveProfile(){let n=document.getElementById("nameInput").value.trim();if(n.length>20){showToast("Keep your name under 20 characters.");return}profileName=n||"Player";save();updateGame();showToast("Profile saved! 🧑‍🚀")}
+function renderAchievements(){let s={xp,quests,streak,level:getLevelInfo().level},u=JSON.parse(localStorage.getItem("lifeXPAchievements")||"[]");let count=0;document.getElementById("achievementList").innerHTML=ACHIEVEMENTS.map(a=>{let earned=!a.premium&&(u.includes(a.id)||a.check(s));if(earned&&!u.includes(a.id))u.push(a.id);if(earned)count++;return`<div class="achievement ${earned?"unlocked":""} ${a.premium?"locked-premium":""}">${a.icon} <b>${a.name}</b> — ${a.description}${a.premium?' <span class="lock">PREMIUM</span>':earned?" ✓":""}</div>`}).join("");document.getElementById("achCount").textContent=count;localStorage.setItem("lifeXPAchievements",JSON.stringify(u))}
+function resetGame(){if(!confirm("Reset all LifeXP progress, quests, streak, and custom quests?"))return;xp=0;quests=0;streak=0;longestStreak=0;lastCompletedDate="";tasks=DEFAULT_TASKS.map(t=>({...t}));completedToday=[];selectedCategory="All";localStorage.clear();save();updateGame();showToast("Progress reset.")}
+function showToast(m){let t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove("show"),2500)}
+function escapeHtml(t){return String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+checkNewDay();updateGame();
 </script>
 <script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js")
-      .catch(err => console.log("Service worker registration failed:", err));
-  });
-}
+if("serviceWorker"in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(e=>console.log("SW registration failed",e)))}
 </script>
 </body>
 </html>
