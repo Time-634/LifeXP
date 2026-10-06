@@ -169,7 +169,12 @@ input:focus,select:focus{border-color:#8b5cf6}
 <div class="card">
   <div class="section-head"><h2>🌳 LifeXP Skill Tree</h2><span class="badge" id="skillPointsText">0 points</span></div>
   <div class="skill-points"><b>Every level gives you 1 Skill Point.</b><div class="small">Complete quests in a category to grow that skill.</div></div>
-  <div class="skill-grid" id="skillTree"></div>
+  <div class="skill-grid" id="skillTree">
+  <div class="skill-node unlocked"><div class="skill-icon">🧠</div><div class="skill-name">Mind</div><div class="skill-level">Skill Level 1</div><div class="skill-bar"><div class="skill-fill" style="width:0%"></div></div><div class="skill-req">Focus, reading, studying</div></div>
+  <div class="skill-node unlocked"><div class="skill-icon">💪</div><div class="skill-name">Body</div><div class="skill-level">Skill Level 1</div><div class="skill-bar"><div class="skill-fill" style="width:0%"></div></div><div class="skill-req">Exercise, sleep, hydration</div></div>
+  <div class="skill-node unlocked"><div class="skill-icon">🏠</div><div class="skill-name">Life</div><div class="skill-level">Skill Level 1</div><div class="skill-bar"><div class="skill-fill" style="width:0%"></div></div><div class="skill-req">Chores and real-life tasks</div></div>
+  <div class="skill-node locked"><div class="skill-icon">🔥</div><div class="skill-name">Discipline</div><div class="skill-level">Skill Level 1 🔒</div><div class="skill-bar"><div class="skill-fill" style="width:0%"></div></div><div class="skill-req">Unlocks at player level 2</div></div>
+</div>
   <p class="small">Skill Tree v1: your category progress is now tracked. More unlockable abilities can be added later.</p>
 </div>
 
@@ -245,21 +250,27 @@ function renderAvatarPicker(){
 }
 function chooseAvatar(a){avatar=a;localStorage.setItem("lifeXPAvatar",avatar);updateGame();showToast("Character updated! 🧑‍🎤")}
 function renderSkillTree(){
+  const tree=document.getElementById("skillTree");
+  if(!tree)return;
   const level=getLevelInfo().level;
   const points=availableSkillPoints();
-  document.getElementById("skillPointsBadge").textContent=points+" skill point"+(points===1?"":"s");
-  document.getElementById("skillPointsText").textContent=points+" point"+(points===1?"":"s");
-  document.getElementById("skillTree").innerHTML=SKILLS.map(sk=>{
+  const badge=document.getElementById("skillPointsBadge");
+  const text=document.getElementById("skillPointsText");
+  if(badge)badge.textContent=points+" skill point"+(points===1?"":"s");
+  if(text)text.textContent=points+" point"+(points===1?"":"s");
+  tree.innerHTML=SKILLS.map(sk=>{
     const lvl=skillLevel(sk.id), unlocked=level>=sk.unlock;
+    const pct=skillProgress(sk.id);
     return `<div class="skill-node ${unlocked?"unlocked":"locked"}">
       <div class="skill-icon">${sk.icon}</div>
       <div class="skill-name">${sk.name}</div>
       <div class="skill-level">Skill Level ${lvl}${unlocked?"":" 🔒"}</div>
-      <div class="skill-bar"><div class="skill-fill" style="width:${skillProgress(sk.id)}%"></div></div>
+      <div class="skill-bar"><div class="skill-fill" style="width:${pct}%"></div></div>
       <div class="skill-req">${unlocked?sk.desc+" • "+Number(skillXP[sk.id]||0)+" XP":`Unlocks at player level ${sk.unlock}`}</div>
     </div>`;
   }).join("");
 }
+
 function awardSkillXP(category,amount){
   let id=category;
   if(!SKILLS.some(s=>s.id===id))id="Life";
@@ -286,7 +297,7 @@ function renderAchievements(){let s={xp,quests,streak,level:getLevelInfo().level
 function resetGame(){if(!confirm("Reset all LifeXP progress, quests, streak, and custom quests?"))return;xp=0;quests=0;streak=0;longestStreak=0;lastCompletedDate="";tasks=DEFAULT_TASKS.map(t=>({...t}));completedToday=[];selectedCategory="All";avatar=AVATARS[0];skillXP={};skillPoints=0;spentSkillPoints=0;localStorage.clear();save();updateGame();showToast("Progress reset.")}
 function showToast(m){let t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove("show"),2500)}
 function escapeHtml(t){return String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
-checkNewDay();updateGame();
+checkNewDay();updateGame();setTimeout(renderSkillTree,50);
 </script>
 <script>
 if("serviceWorker"in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(e=>console.log("SW registration failed",e)))}
