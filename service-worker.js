@@ -1,4 +1,4 @@
-const CACHE_NAME = "lifexp-v1";
+const CACHE_NAME = "lifexp-v2";
 const FILES = [
   "./", "./index.html", "./manifest.json", "./service-worker.js",
   "./icons/icon-180.png", "./icons/icon-192.png", "./icons/icon-512.png"
