@@ -78,6 +78,20 @@ input:focus,select:focus{border-color:#8b5cf6}
 .avatar-note{font-size:11px;color:#9ca3af;margin-top:5px}
 @media(max-width:600px){.character-panel{grid-template-columns:1fr;text-align:center}.character-avatar{margin:auto}.avatar-picker{justify-content:center}.skill-grid{grid-template-columns:1fr}}
 
+
+.skill-upgrade-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.upgrade-card{background:#17172a;border:1px solid #343451;border-radius:16px;padding:15px}
+.upgrade-card.unlocked{border-color:#22d3ee}
+.upgrade-card.maxed{border-color:#f59e0b}
+.upgrade-top{display:flex;align-items:center;gap:9px}
+.upgrade-icon{font-size:28px}
+.upgrade-name{font-weight:900;font-size:17px}
+.upgrade-desc{font-size:12px;color:#a1a1aa;margin:7px 0 10px;line-height:1.4}
+.upgrade-level{font-size:12px;color:#c4b5fd;margin-bottom:8px}
+.upgrade-btn{width:100%;padding:9px;border:0;border-radius:10px;font-weight:900;background:#7c3aed;color:white;cursor:pointer}
+.upgrade-btn:disabled{opacity:.4;cursor:not-allowed}
+.skill-points-big{font-size:18px;font-weight:900;text-align:center;padding:12px;border:1px solid #8b5cf6;border-radius:12px;background:#251b49;margin-bottom:14px}
+@media(max-width:600px){.skill-upgrade-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -179,6 +193,13 @@ input:focus,select:focus{border-color:#8b5cf6}
 </div>
 
 <div class="card">
+  <div class="section-head"><h2>⚔️ Skill Upgrades</h2></div>
+  <div class="skill-points-big" id="skillPointsBig">⭐ 0 Skill Points available</div>
+  <div class="skill-upgrade-grid" id="skillUpgrades"></div>
+  <p class="small">Spend Skill Points to unlock upgrades. Each branch must be unlocked in order.</p>
+</div>
+
+<div class="card">
   <h2>📊 Player Stats</h2>
   <p>Quests completed: <b id="quests2">0</b></p>
   <p>Total XP earned: <b id="totalXP2">0</b></p>
@@ -227,6 +248,66 @@ let avatar=localStorage.getItem("lifeXPAvatar")||AVATARS[0];
 let skillXP=JSON.parse(localStorage.getItem("lifeXPSkillXP")||"{}");
 let skillPoints=Number(localStorage.getItem("lifeXPSkillPoints"))||0;
 let spentSkillPoints=Number(localStorage.getItem("lifeXPSpentSkillPoints"))||0;
+const SKILL_UPGRADES={
+  Mind:[
+    {name:"Focus I",icon:"🎯",desc:"+5% XP from Mind/School quests.",bonus:0.05},
+    {name:"Focus II",icon:"🧠",desc:"+10% XP from Mind/School quests.",bonus:0.10},
+    {name:"Mastermind",icon:"👑",desc:"+20% XP from Mind/School quests.",bonus:0.20}
+  ],
+  Body:[
+    {name:"Fitness I",icon:"🏃",desc:"+5% XP from Body quests.",bonus:0.05},
+    {name:"Fitness II",icon:"💪",desc:"+10% XP from Body quests.",bonus:0.10},
+    {name:"Athlete",icon:"🏆",desc:"+20% XP from Body quests.",bonus:0.20}
+  ],
+  Life:[
+    {name:"Responsibility I",icon:"🧹",desc:"+5% XP from Life quests.",bonus:0.05},
+    {name:"Responsibility II",icon:"🏠",desc:"+10% XP from Life quests.",bonus:0.10},
+    {name:"Life Master",icon:"⭐",desc:"+20% XP from Life quests.",bonus:0.20}
+  ],
+  Discipline:[
+    {name:"Consistency I",icon:"🔥",desc:"+5% XP from streak/discipline quests.",bonus:0.05},
+    {name:"Consistency II",icon:"⚡",desc:"+10% XP from streak/discipline quests.",bonus:0.10},
+    {name:"Iron Will",icon:"🛡️",desc:"+20% XP from Discipline quests.",bonus:0.20}
+  ]
+};
+let skillUpgrades=JSON.parse(localStorage.getItem("lifeXPSkillUpgrades")||"{}");
+function upgradeLevel(id){return Number(skillUpgrades[id]||0)}
+function buyUpgrade(id){
+  const [skill,indexText]=id.split(":"); const index=Number(indexText);
+  const current=upgradeLevel(id);
+  if(current>=1 || availableSkillPoints()<1)return;
+  if(index>0 && upgradeLevel(skill+":"+(index-1))<1){showToast("Unlock the previous skill first! 🔒");return}
+  skillUpgrades[id]=1; spentSkillPoints++;
+  localStorage.setItem("lifeXPSkillUpgrades",JSON.stringify(skillUpgrades));
+  localStorage.setItem("lifeXPSpentSkillPoints",spentSkillPoints);localStorage.setItem("lifeXPSkillUpgrades",JSON.stringify(skillUpgrades));
+  updateGame(); showToast("Skill unlocked! "+SKILL_UPGRADES[skill][index].name+" 🎉");
+}
+function skillMultiplier(category){
+  let id=category;
+  if(category==="School")id="Mind";
+  if(category==="Hobbies")id="Life";
+  if(!SKILL_UPGRADES[id])id="Life";
+  return 1+SKILL_UPGRADES[id].reduce((sum,_,i)=>sum+(upgradeLevel(id+":"+i)?SKILL_UPGRADES[id][i].bonus:0),0);
+}
+function renderUpgrades(){
+  const container=document.getElementById("skillUpgrades");
+  if(!container)return;
+  document.getElementById("skillPointsBig").textContent="⭐ "+availableSkillPoints()+" Skill Point"+(availableSkillPoints()===1?"":"s")+" available";
+  container.innerHTML=Object.entries(SKILL_UPGRADES).map(([skill,list])=>`
+    <div class="upgrade-card">
+      <div class="upgrade-top"><div class="upgrade-icon">${SKILLS.find(s=>s.id===skill)?.icon||"⭐"}</div><div class="upgrade-name">${skill}</div></div>
+      ${list.map((u,i)=>{
+        const id=skill+":"+i, bought=upgradeLevel(id), previous=i===0||upgradeLevel(skill+":"+(i-1));
+        return `<div style="margin-top:12px;padding-top:10px;border-top:1px solid #292943">
+          <div class="upgrade-top"><span class="upgrade-icon">${u.icon}</span><span class="upgrade-name">${u.name}</span></div>
+          <div class="upgrade-desc">${u.desc}</div>
+          <div class="upgrade-level">${bought?"✅ Unlocked":"🔒 Locked"}</div>
+          <button class="upgrade-btn" onclick="buyUpgrade('${id}')" ${bought||!previous||availableSkillPoints()<1?"disabled":""}>${bought?"Unlocked":(!previous?"Requires previous skill":"Spend 1 Skill Point")}</button>
+        </div>`;
+      }).join("")}
+    </div>`).join("");
+}
+
 
 function todayKey(){let d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function yesterdayKey(){let d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
@@ -282,19 +363,19 @@ function save(){
 localStorage.setItem("lifeXP",xp);localStorage.setItem("quests",quests);localStorage.setItem("lifeXPStreak",streak);
 localStorage.setItem("lifeXPLongestStreak",longestStreak);localStorage.setItem("lifeXPLastDate",lastCompletedDate);
 localStorage.setItem("lifeXPTasks",JSON.stringify(tasks));localStorage.setItem("lifeXPCompletedToday",JSON.stringify(completedToday));
-localStorage.setItem("lifeXPProfileName",profileName);localStorage.setItem("lifeXPAvatar",avatar);localStorage.setItem("lifeXPSkillXP",JSON.stringify(skillXP));localStorage.setItem("lifeXPSkillPoints",availableSkillPoints());localStorage.setItem("lifeXPSpentSkillPoints",spentSkillPoints)
+localStorage.setItem("lifeXPProfileName",profileName);localStorage.setItem("lifeXPAvatar",avatar);localStorage.setItem("lifeXPSkillXP",JSON.stringify(skillXP));localStorage.setItem("lifeXPSkillPoints",availableSkillPoints());localStorage.setItem("lifeXPSpentSkillPoints",spentSkillPoints);localStorage.setItem("lifeXPSkillUpgrades",JSON.stringify(skillUpgrades))
 }
 function checkNewDay(){let t=todayKey();if(localStorage.getItem("lifeXPLastOpened")!==t){completedToday=[];localStorage.setItem("lifeXPLastOpened",t);save()}}
-function updateGame(){checkNewDay();let i=getLevelInfo();document.getElementById("level").textContent=i.level;document.getElementById("xp").textContent=i.current;document.getElementById("nextXP").textContent=i.needed;document.getElementById("progress").style.width=Math.min(100,i.current/i.needed*100)+"%";document.getElementById("streak").textContent=streak;document.getElementById("quests").textContent=quests;document.getElementById("quests2").textContent=quests;document.getElementById("totalXP").textContent=xp;document.getElementById("totalXP2").textContent=xp;document.getElementById("longestStreak").textContent=longestStreak;document.getElementById("profileName").textContent=profileName;document.getElementById("nameInput").value=profileName;document.getElementById("profileTitle").textContent=getTitle(i.level,quests,streak);document.getElementById("characterLevel").textContent=i.level;document.getElementById("characterName").textContent=profileName;document.getElementById("characterTitle").textContent=getTitle(i.level,quests,streak);document.getElementById("characterAvatar").textContent=avatar;renderAvatarPicker();renderCategories();renderTasks();renderAchievements();renderSkillTree();save()}
+function updateGame(){checkNewDay();let i=getLevelInfo();document.getElementById("level").textContent=i.level;document.getElementById("xp").textContent=i.current;document.getElementById("nextXP").textContent=i.needed;document.getElementById("progress").style.width=Math.min(100,i.current/i.needed*100)+"%";document.getElementById("streak").textContent=streak;document.getElementById("quests").textContent=quests;document.getElementById("quests2").textContent=quests;document.getElementById("totalXP").textContent=xp;document.getElementById("totalXP2").textContent=xp;document.getElementById("longestStreak").textContent=longestStreak;document.getElementById("profileName").textContent=profileName;document.getElementById("nameInput").value=profileName;document.getElementById("profileTitle").textContent=getTitle(i.level,quests,streak);document.getElementById("characterLevel").textContent=i.level;document.getElementById("characterName").textContent=profileName;document.getElementById("characterTitle").textContent=getTitle(i.level,quests,streak);document.getElementById("characterAvatar").textContent=avatar;renderAvatarPicker();renderCategories();renderTasks();renderAchievements();renderSkillTree();renderUpgrades();save()}
 function getTitle(level,q,s){if(level>=10)return"👑 Legend";if(s>=7)return"🔥 Unstoppable";if(q>=100)return"🏅 Hard Worker";if(level>=5)return"⚔️ Adventurer";return"⭐ Rookie"}
 function renderCategories(){let cats=["All",...new Set(tasks.map(t=>t.category))];document.getElementById("categoryTabs").innerHTML=cats.map(c=>`<button class="tab ${selectedCategory===c?"active":""}" onclick="selectCategory('${escapeHtml(c)}')">${escapeHtml(c)}</button>`).join("")}
 function selectCategory(c){selectedCategory=c;renderCategories();renderTasks()}
 function renderTasks(){let visible=tasks.filter(t=>selectedCategory==="All"||t.category===selectedCategory);document.getElementById("questCount").textContent=completedToday.length+" today";document.getElementById("taskList").innerHTML=visible.length?visible.map(t=>{let done=completedToday.includes(t.id);return`<div class="task"><div class="task-info">${escapeHtml(t.name)} <span class="badge">${escapeHtml(t.category)}</span></div><div><span class="task-xp">+${t.xp} XP</span><button ${done?"disabled":""} onclick="completeTask('${t.id}')">${done?"✓ Done":"Complete"}</button></div></div>`}).join(""):'<div class="empty">No quests in this category yet.</div>'}
-function completeTask(id){if(completedToday.includes(id))return;let t=tasks.find(x=>x.id===id);if(!t)return;let old=getLevelInfo().level,today=todayKey();if(lastCompletedDate!==today){streak=lastCompletedDate===yesterdayKey()?streak+1:1;longestStreak=Math.max(longestStreak,streak);lastCompletedDate=today}xp+=t.xp;quests++;completedToday.push(id);awardSkillXP(t.category,Math.max(25,Math.round(t.xp/2)));save();updateGame();let nl=getLevelInfo().level;showToast(nl>old?"🎉 LEVEL UP! Level "+nl+"!":"+"+t.xp+" XP earned! ⚡")}
+function completeTask(id){if(completedToday.includes(id))return;let t=tasks.find(x=>x.id===id);if(!t)return;let old=getLevelInfo().level,today=todayKey();if(lastCompletedDate!==today){streak=lastCompletedDate===yesterdayKey()?streak+1:1;longestStreak=Math.max(longestStreak,streak);lastCompletedDate=today}xp+=Math.round(t.xp*skillMultiplier(t.category));quests++;completedToday.push(id);awardSkillXP(t.category,Math.max(25,Math.round(t.xp/2)));save();updateGame();let nl=getLevelInfo().level;showToast(nl>old?"🎉 LEVEL UP! Level "+nl+"!":"+"+t.xp+" XP earned! ⚡")}
 function addTask(){let n=document.getElementById("taskName").value.trim(),a=Number(document.getElementById("taskXP").value),c=document.getElementById("taskCategory").value;if(!n){showToast("Enter a quest name first.");return}if(!a||a<1||a>1000){showToast("XP must be between 1 and 1000.");return}tasks.push({id:"custom-"+Date.now(),name:"🎯 "+n,xp:a,category:c});document.getElementById("taskName").value="";document.getElementById("taskXP").value=50;save();updateGame();showToast("Quest added! 🎯")}
 function saveProfile(){let n=document.getElementById("nameInput").value.trim();if(n.length>20){showToast("Keep your name under 20 characters.");return}profileName=n||"Player";save();updateGame();showToast("Profile saved! 🧑‍🚀")}
 function renderAchievements(){let s={xp,quests,streak,level:getLevelInfo().level},u=JSON.parse(localStorage.getItem("lifeXPAchievements")||"[]");let count=0;document.getElementById("achievementList").innerHTML=ACHIEVEMENTS.map(a=>{let earned=!a.premium&&(u.includes(a.id)||a.check(s));if(earned&&!u.includes(a.id))u.push(a.id);if(earned)count++;return`<div class="achievement ${earned?"unlocked":""} ${a.premium?"locked-premium":""}">${a.icon} <b>${a.name}</b> — ${a.description}${a.premium?' <span class="lock">PREMIUM</span>':earned?" ✓":""}</div>`}).join("");document.getElementById("achCount").textContent=count;localStorage.setItem("lifeXPAchievements",JSON.stringify(u))}
-function resetGame(){if(!confirm("Reset all LifeXP progress, quests, streak, and custom quests?"))return;xp=0;quests=0;streak=0;longestStreak=0;lastCompletedDate="";tasks=DEFAULT_TASKS.map(t=>({...t}));completedToday=[];selectedCategory="All";avatar=AVATARS[0];skillXP={};skillPoints=0;spentSkillPoints=0;localStorage.clear();save();updateGame();showToast("Progress reset.")}
+function resetGame(){if(!confirm("Reset all LifeXP progress, quests, streak, and custom quests?"))return;xp=0;quests=0;streak=0;longestStreak=0;lastCompletedDate="";tasks=DEFAULT_TASKS.map(t=>({...t}));completedToday=[];selectedCategory="All";avatar=AVATARS[0];skillXP={};skillPoints=0;spentSkillPoints=0;skillUpgrades={};localStorage.clear();save();updateGame();showToast("Progress reset.")}
 function showToast(m){let t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove("show"),2500)}
 function escapeHtml(t){return String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 checkNewDay();updateGame();setTimeout(renderSkillTree,50);
