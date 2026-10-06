@@ -55,6 +55,29 @@ input:focus,select:focus{border-color:#8b5cf6}
 .empty{text-align:center;color:#9ca3af;padding:12px}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(100px);background:#111827;border:1px solid #7c3aed;padding:13px 18px;border-radius:14px;transition:.3s;z-index:10;box-shadow:0 10px 30px #0008}.toast.show{transform:translateX(-50%) translateY(0)}
 @media(max-width:600px){.hero{grid-template-columns:1fr}.streak{text-align:left}.stats{grid-template-columns:repeat(2,1fr)}.form-row{flex-wrap:wrap}.form-row input:first-child{min-width:100%}.task{align-items:flex-start;flex-direction:column}.task button{margin-top:4px}}
+
+.character-panel{display:grid;grid-template-columns:130px 1fr;gap:18px;align-items:center}
+.character-avatar{width:120px;height:120px;border-radius:28px;display:grid;place-items:center;background:linear-gradient(145deg,#31245f,#172a43);border:2px solid #8b5cf6;font-size:64px;box-shadow:0 10px 30px #0005}
+.character-level{font-size:13px;color:#a5b4fc;font-weight:800;letter-spacing:1px}
+.character-name{font-size:30px;font-weight:900;margin:3px 0}
+.character-title{color:#c4b5fd;font-weight:700}
+.avatar-picker{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.avatar-picker button{font-size:22px;padding:7px 10px;background:#30304b}
+.avatar-picker button.active{outline:2px solid #22d3ee;background:#4c1d95}
+.skill-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.skill-node{background:#17172a;border:1px solid #343451;border-radius:16px;padding:15px;position:relative;overflow:hidden}
+.skill-node.unlocked{border-color:#22d3ee;box-shadow:0 0 18px #22d3ee22}
+.skill-node.locked{opacity:.55}
+.skill-icon{font-size:30px}
+.skill-name{font-weight:900;font-size:18px;margin-top:4px}
+.skill-level{color:#a5b4fc;font-size:13px;margin:3px 0 8px}
+.skill-bar{height:8px;background:#0f172a;border-radius:8px;overflow:hidden}
+.skill-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#22d3ee)}
+.skill-req{font-size:11px;color:#9ca3af;margin-top:7px}
+.skill-points{background:#251b49;border:1px solid #8b5cf6;border-radius:12px;padding:10px;text-align:center;margin-bottom:12px}
+.avatar-note{font-size:11px;color:#9ca3af;margin-top:5px}
+@media(max-width:600px){.character-panel{grid-template-columns:1fr;text-align:center}.character-avatar{margin:auto}.avatar-picker{justify-content:center}.skill-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -77,12 +100,20 @@ input:focus,select:focus{border-color:#8b5cf6}
 </div>
 
 <div class="card">
-  <div class="profile-row">
-    <div class="avatar">🧑‍🚀</div>
-    <div><div class="profile-name" id="profileName">Player</div><div class="title" id="profileTitle">Rookie</div></div>
+  <div class="section-head"><h2>🧑‍🎤 Character</h2><span class="badge" id="skillPointsBadge">0 skill points</span></div>
+  <div class="character-panel">
+    <div>
+      <div class="character-avatar" id="characterAvatar">🧑‍🚀</div>
+      <div class="avatar-picker" id="avatarPicker"></div>
+    </div>
+    <div>
+      <div class="character-level">LEVEL <span id="characterLevel">1</span></div>
+      <div class="character-name" id="characterName">Player</div>
+      <div class="character-title" id="characterTitle">⭐ Rookie</div>
+      <div class="form-row"><input id="nameInput" placeholder="Your player name"><button onclick="saveProfile()">Save</button></div>
+      <div class="avatar-note">Choose your character. Your profile and progress are saved on this device.</div>
+    </div>
   </div>
-  <div class="form-row"><input id="nameInput" placeholder="Your player name"><button onclick="saveProfile()">Save Profile</button></div>
-  <p class="small">Your profile is stored on this device.</p>
 </div>
 
 <div class="card">
@@ -136,14 +167,10 @@ input:focus,select:focus{border-color:#8b5cf6}
 </div>
 
 <div class="card">
-  <h2>🌳 LifeXP Skill Tree</h2>
-  <div class="stats">
-    <div class="stat">🧠<b>Mind</b><span class="small">Level 1</span></div>
-    <div class="stat">💪<b>Body</b><span class="small">Level 1</span></div>
-    <div class="stat">🏠<b>Life</b><span class="small">Level 1</span></div>
-    <div class="stat">🔥<b>Discipline</b><span class="small">Level 1</span></div>
-  </div>
-  <p class="small">Your real-life RPG skill tree is coming in a future update.</p>
+  <div class="section-head"><h2>🌳 LifeXP Skill Tree</h2><span class="badge" id="skillPointsText">0 points</span></div>
+  <div class="skill-points"><b>Every level gives you 1 Skill Point.</b><div class="small">Complete quests in a category to grow that skill.</div></div>
+  <div class="skill-grid" id="skillTree"></div>
+  <p class="small">Skill Tree v1: your category progress is now tracked. More unlockable abilities can be added later.</p>
 </div>
 
 <div class="card">
@@ -184,28 +211,79 @@ tasks=tasks.map(t=>({...t,category:t.category||"Life"}));
 let completedToday=JSON.parse(localStorage.getItem("lifeXPCompletedToday")||"[]");
 let profileName=localStorage.getItem("lifeXPProfileName")||"Player";
 let selectedCategory="All";
+const AVATARS=["🧑‍🚀","🧙","🥷","🦸","🧝","🤖","🧑‍🎤","🧑‍💻"];
+const SKILLS=[
+  {id:"Mind",icon:"🧠",name:"Mind",desc:"Focus, reading, studying",unlock:1},
+  {id:"Body",icon:"💪",name:"Body",desc:"Exercise, sleep, hydration",unlock:1},
+  {id:"Life",icon:"🏠",name:"Life",desc:"Chores and real-life tasks",unlock:1},
+  {id:"Discipline",icon:"🔥",name:"Discipline",desc:"Streaks and consistency",unlock:2}
+];
+let avatar=localStorage.getItem("lifeXPAvatar")||AVATARS[0];
+let skillXP=JSON.parse(localStorage.getItem("lifeXPSkillXP")||"{}");
+let skillPoints=Number(localStorage.getItem("lifeXPSkillPoints"))||0;
+let spentSkillPoints=Number(localStorage.getItem("lifeXPSpentSkillPoints"))||0;
 
 function todayKey(){let d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function yesterdayKey(){let d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function xpNeededForLevel(l){return l<=1?0:Math.round(500*Math.pow(l-1,1.25))}
 function getLevelInfo(){let level=1;while(xp>=xpNeededForLevel(level+1))level++;let base=xpNeededForLevel(level),next=xpNeededForLevel(level+1);return{level,current:xp-base,needed:next-base}}
+function skillLevel(id){
+  const v=Number(skillXP[id]||0);
+  return Math.min(10,Math.floor(v/250)+1);
+}
+function skillProgress(id){
+  const v=Number(skillXP[id]||0);
+  const lvl=skillLevel(id);
+  if(lvl>=10)return 100;
+  return Math.min(100,(v%250)/250*100);
+}
+function availableSkillPoints(){
+  return Math.max(0,getLevelInfo().level-1-spentSkillPoints);
+}
+function renderAvatarPicker(){
+  document.getElementById("avatarPicker").innerHTML=AVATARS.map(a=>`<button class="${avatar===a?"active":""}" onclick="chooseAvatar('${a}')">${a}</button>`).join("");
+}
+function chooseAvatar(a){avatar=a;localStorage.setItem("lifeXPAvatar",avatar);updateGame();showToast("Character updated! 🧑‍🎤")}
+function renderSkillTree(){
+  const level=getLevelInfo().level;
+  const points=availableSkillPoints();
+  document.getElementById("skillPointsBadge").textContent=points+" skill point"+(points===1?"":"s");
+  document.getElementById("skillPointsText").textContent=points+" point"+(points===1?"":"s");
+  document.getElementById("skillTree").innerHTML=SKILLS.map(sk=>{
+    const lvl=skillLevel(sk.id), unlocked=level>=sk.unlock;
+    return `<div class="skill-node ${unlocked?"unlocked":"locked"}">
+      <div class="skill-icon">${sk.icon}</div>
+      <div class="skill-name">${sk.name}</div>
+      <div class="skill-level">Skill Level ${lvl}${unlocked?"":" 🔒"}</div>
+      <div class="skill-bar"><div class="skill-fill" style="width:${skillProgress(sk.id)}%"></div></div>
+      <div class="skill-req">${unlocked?sk.desc+" • "+Number(skillXP[sk.id]||0)+" XP":`Unlocks at player level ${sk.unlock}`}</div>
+    </div>`;
+  }).join("");
+}
+function awardSkillXP(category,amount){
+  let id=category;
+  if(!SKILLS.some(s=>s.id===id))id="Life";
+  skillXP[id]=(Number(skillXP[id]||0)+amount);
+  localStorage.setItem("lifeXPSkillXP",JSON.stringify(skillXP));
+}
+
 function save(){
 localStorage.setItem("lifeXP",xp);localStorage.setItem("quests",quests);localStorage.setItem("lifeXPStreak",streak);
 localStorage.setItem("lifeXPLongestStreak",longestStreak);localStorage.setItem("lifeXPLastDate",lastCompletedDate);
 localStorage.setItem("lifeXPTasks",JSON.stringify(tasks));localStorage.setItem("lifeXPCompletedToday",JSON.stringify(completedToday));
-localStorage.setItem("lifeXPProfileName",profileName)
+localStorage.setItem("lifeXPProfileName",profileName);localStorage.setItem("lifeXPAvatar",avatar);localStorage.setItem("lifeXPSkillXP",JSON.stringify(skillXP));localStorage.setItem("lifeXPSkillPoints",availableSkillPoints());localStorage.setItem("lifeXPSpentSkillPoints",spentSkillPoints)
 }
 function checkNewDay(){let t=todayKey();if(localStorage.getItem("lifeXPLastOpened")!==t){completedToday=[];localStorage.setItem("lifeXPLastOpened",t);save()}}
-function updateGame(){checkNewDay();let i=getLevelInfo();document.getElementById("level").textContent=i.level;document.getElementById("xp").textContent=i.current;document.getElementById("nextXP").textContent=i.needed;document.getElementById("progress").style.width=Math.min(100,i.current/i.needed*100)+"%";document.getElementById("streak").textContent=streak;document.getElementById("quests").textContent=quests;document.getElementById("quests2").textContent=quests;document.getElementById("totalXP").textContent=xp;document.getElementById("totalXP2").textContent=xp;document.getElementById("longestStreak").textContent=longestStreak;document.getElementById("profileName").textContent=profileName;document.getElementById("nameInput").value=profileName;document.getElementById("profileTitle").textContent=getTitle(i.level,quests,streak);renderCategories();renderTasks();renderAchievements();save()}
+function updateGame(){checkNewDay();let i=getLevelInfo();document.getElementById("level").textContent=i.level;document.getElementById("xp").textContent=i.current;document.getElementById("nextXP").textContent=i.needed;document.getElementById("progress").style.width=Math.min(100,i.current/i.needed*100)+"%";document.getElementById("streak").textContent=streak;document.getElementById("quests").textContent=quests;document.getElementById("quests2").textContent=quests;document.getElementById("totalXP").textContent=xp;document.getElementById("totalXP2").textContent=xp;document.getElementById("longestStreak").textContent=longestStreak;document.getElementById("profileName").textContent=profileName;document.getElementById("nameInput").value=profileName;document.getElementById("profileTitle").textContent=getTitle(i.level,quests,streak);document.getElementById("characterLevel").textContent=i.level;document.getElementById("characterName").textContent=profileName;document.getElementById("characterTitle").textContent=getTitle(i.level,quests,streak);document.getElementById("characterAvatar").textContent=avatar;renderAvatarPicker();renderCategories();renderTasks();renderAchievements();renderSkillTree();save()}
 function getTitle(level,q,s){if(level>=10)return"👑 Legend";if(s>=7)return"🔥 Unstoppable";if(q>=100)return"🏅 Hard Worker";if(level>=5)return"⚔️ Adventurer";return"⭐ Rookie"}
 function renderCategories(){let cats=["All",...new Set(tasks.map(t=>t.category))];document.getElementById("categoryTabs").innerHTML=cats.map(c=>`<button class="tab ${selectedCategory===c?"active":""}" onclick="selectCategory('${escapeHtml(c)}')">${escapeHtml(c)}</button>`).join("")}
 function selectCategory(c){selectedCategory=c;renderCategories();renderTasks()}
 function renderTasks(){let visible=tasks.filter(t=>selectedCategory==="All"||t.category===selectedCategory);document.getElementById("questCount").textContent=completedToday.length+" today";document.getElementById("taskList").innerHTML=visible.length?visible.map(t=>{let done=completedToday.includes(t.id);return`<div class="task"><div class="task-info">${escapeHtml(t.name)} <span class="badge">${escapeHtml(t.category)}</span></div><div><span class="task-xp">+${t.xp} XP</span><button ${done?"disabled":""} onclick="completeTask('${t.id}')">${done?"✓ Done":"Complete"}</button></div></div>`}).join(""):'<div class="empty">No quests in this category yet.</div>'}
-function completeTask(id){if(completedToday.includes(id))return;let t=tasks.find(x=>x.id===id);if(!t)return;let old=getLevelInfo().level,today=todayKey();if(lastCompletedDate!==today){streak=lastCompletedDate===yesterdayKey()?streak+1:1;longestStreak=Math.max(longestStreak,streak);lastCompletedDate=today}xp+=t.xp;quests++;completedToday.push(id);save();updateGame();let nl=getLevelInfo().level;showToast(nl>old?"🎉 LEVEL UP! Level "+nl+"!":"+"+t.xp+" XP earned! ⚡")}
+function completeTask(id){if(completedToday.includes(id))return;let t=tasks.find(x=>x.id===id);if(!t)return;let old=getLevelInfo().level,today=todayKey();if(lastCompletedDate!==today){streak=lastCompletedDate===yesterdayKey()?streak+1:1;longestStreak=Math.max(longestStreak,streak);lastCompletedDate=today}xp+=t.xp;quests++;completedToday.push(id);awardSkillXP(t.category,Math.max(25,Math.round(t.xp/2)));save();updateGame();let nl=getLevelInfo().level;showToast(nl>old?"🎉 LEVEL UP! Level "+nl+"!":"+"+t.xp+" XP earned! ⚡")}
 function addTask(){let n=document.getElementById("taskName").value.trim(),a=Number(document.getElementById("taskXP").value),c=document.getElementById("taskCategory").value;if(!n){showToast("Enter a quest name first.");return}if(!a||a<1||a>1000){showToast("XP must be between 1 and 1000.");return}tasks.push({id:"custom-"+Date.now(),name:"🎯 "+n,xp:a,category:c});document.getElementById("taskName").value="";document.getElementById("taskXP").value=50;save();updateGame();showToast("Quest added! 🎯")}
 function saveProfile(){let n=document.getElementById("nameInput").value.trim();if(n.length>20){showToast("Keep your name under 20 characters.");return}profileName=n||"Player";save();updateGame();showToast("Profile saved! 🧑‍🚀")}
 function renderAchievements(){let s={xp,quests,streak,level:getLevelInfo().level},u=JSON.parse(localStorage.getItem("lifeXPAchievements")||"[]");let count=0;document.getElementById("achievementList").innerHTML=ACHIEVEMENTS.map(a=>{let earned=!a.premium&&(u.includes(a.id)||a.check(s));if(earned&&!u.includes(a.id))u.push(a.id);if(earned)count++;return`<div class="achievement ${earned?"unlocked":""} ${a.premium?"locked-premium":""}">${a.icon} <b>${a.name}</b> — ${a.description}${a.premium?' <span class="lock">PREMIUM</span>':earned?" ✓":""}</div>`}).join("");document.getElementById("achCount").textContent=count;localStorage.setItem("lifeXPAchievements",JSON.stringify(u))}
-function resetGame(){if(!confirm("Reset all LifeXP progress, quests, streak, and custom quests?"))return;xp=0;quests=0;streak=0;longestStreak=0;lastCompletedDate="";tasks=DEFAULT_TASKS.map(t=>({...t}));completedToday=[];selectedCategory="All";localStorage.clear();save();updateGame();showToast("Progress reset.")}
+function resetGame(){if(!confirm("Reset all LifeXP progress, quests, streak, and custom quests?"))return;xp=0;quests=0;streak=0;longestStreak=0;lastCompletedDate="";tasks=DEFAULT_TASKS.map(t=>({...t}));completedToday=[];selectedCategory="All";avatar=AVATARS[0];skillXP={};skillPoints=0;spentSkillPoints=0;localStorage.clear();save();updateGame();showToast("Progress reset.")}
 function showToast(m){let t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove("show"),2500)}
 function escapeHtml(t){return String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 checkNewDay();updateGame();
